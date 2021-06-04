@@ -5,19 +5,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server{
-    ServerSocket socket1;
-    ServerSocket socket2;
-    ServerSocket socket3;
+    ServerSocket socket;
 
-    public void start() {
+    public void start(Integer port) {
         try{
-            socket2 = new ServerSocket(6060);
-            socket1 = new ServerSocket(5050);
-            socket3 = new ServerSocket(7070);
+            socket = new ServerSocket(port);
 
-            new SocketHandler(socket2, 6060).run();
-            new SocketHandler(socket1, 5050).run();
-            new SocketHandler(socket3, 7070).run();
+            new SocketHandler(socket, port).run();
 
         } catch(IOException exception) {
             exception.printStackTrace();

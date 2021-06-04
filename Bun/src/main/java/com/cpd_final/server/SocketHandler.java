@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class SocketHandler extends Thread{
+public class SocketHandler{
     private ServerSocket serverSocket;
     private Integer port;
 
