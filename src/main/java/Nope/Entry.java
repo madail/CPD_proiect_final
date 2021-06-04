@@ -1,4 +1,4 @@
-package main.java;
+package main.java.Nope;
 
 import java.util.Scanner;
 
@@ -22,4 +22,9 @@ public class Entry {
         socketHandler.setCanWrite(isFirst);
         socketHandler.start();
     }
+
+    public static void passToken() {
+
+    }
+
 }

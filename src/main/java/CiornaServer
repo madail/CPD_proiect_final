@@ -1,0 +1,44 @@
+package main.java;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.List;
+
+public class Server {
+    ServerSocket socket1;
+    ServerSocket socket2;
+    ServerSocket socket3;
+    List<SocketQueue> socketsPort1;
+    List<SocketQueue> socketsPort2;
+    List<SocketQueue> socketsPort3;
+    Integer socketsPort1Crt = 0;
+    Integer socketsPort2Crt = 0;
+    Integer socketsPort3Crt = 0;
+
+    public void start() throws IOException {
+        socket1 = new ServerSocket(5050);
+        socket2 = new ServerSocket(6060);
+        socket3 = new ServerSocket(7070);
+
+        while (true) {
+            System.out.println("Server");
+
+            Socket socketForClient1 = socket1.accept();
+            socketsPort1.add(new SocketQueue(socketForClient1, socketsPort1Crt));
+            new ClientHandler(socketForClient1, socketsPort1, socketsPort1Crt).start();
+            socketsPort1Crt++;
+
+            Socket socketForClient2 = socket2.accept();
+            socketsPort2.add(new SocketQueue(socketForClient2, socketsPort2Crt++));
+            new ClientHandler(socketForClient2, socketsPort2, socketsPort2Crt).start();
+            socketsPort2Crt++;
+
+            Socket socketForClient3 = socket3.accept();
+            socketsPort3.add(new SocketQueue(socketForClient3, socketsPort3Crt++));
+            new ClientHandler(socketForClient3, socketsPort3, socketsPort3Crt).start();
+            socketsPort3Crt++;
+        }
+    }
+
+}

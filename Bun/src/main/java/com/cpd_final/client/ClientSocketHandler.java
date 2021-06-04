@@ -1,18 +1,18 @@
-package main.java;
+package com.cpd_final.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class SocketHandler extends Thread{
-    private ServerSocket readSocket; //left socket
+public class ClientSocketHandler extends Thread{
+    private Socket readSocket; //left socket
     private Socket writeSocket; //right socket
-    private BufferedReader in;
-    private PrintWriter out;
+    private BufferedReader inRead;
+    private PrintWriter outRead;
+    private PrintWriter outWrite;
     private Integer readPort; // left port
     private Integer writePort; // right port
     private String host;
@@ -22,7 +22,7 @@ public class SocketHandler extends Thread{
     private Integer timeLeft;
     private final Integer INTERVAL = 10;
 
-    public SocketHandler(Integer readPort, Integer writePort, String host) {
+    public ClientSocketHandler(Integer readPort, Integer writePort, String host) {
         this.readPort = readPort;
         this.writePort = writePort;
         this.host = host;
@@ -30,44 +30,53 @@ public class SocketHandler extends Thread{
 
     public void connect() {
         try {
-            readSocket = new java.net.ServerSocket(readPort);
-            writeSocket = new java.net.Socket(host, writePort);
-            in = new BufferedReader(new InputStreamReader(readSocket.accept().getInputStream())); //aici se opreste somehow
-            out = new PrintWriter(writeSocket.getOutputStream(), true);
+            readSocket = new Socket(host, readPort);
+            writeSocket = new Socket(host, writePort);
+            inRead = new BufferedReader(new InputStreamReader(readSocket.getInputStream()));
+            outRead = new PrintWriter(readSocket.getOutputStream(), true);
+            outWrite = new PrintWriter(writeSocket.getOutputStream(), true);
+
+            outWrite.println("P");
+            outRead.println("S");
         } catch (IOException ioException) {
             ioException.printStackTrace();
             System.out.println("Cannot connect. Try again");
         }
     }
-//si acum cred ca trebuie sa fac aia
 
     @Override
     public void run() {
         connect();
 
         Scanner scanner = new Scanner(System.in);
-        String message;
+        String message = "";
+        String fromConsole = "";
 
-        while(true) {
-            try {
-                System.out.println("Why");
+        try {
+            while(true) {
+                System.out.println("Why " + canWrite + " " + readPort + " " + writePort);
 
-                message = in.readLine();
+                if(!canWrite) {
+                    message = inRead.readLine();
+                }
+
+                System.out.println("Message " + message );
 
                 if(canWrite || "GO".equals(message)) {
                     timeLeft = INTERVAL;
 
                     while(timeLeft > 0 && !doneWriting) {
-                        out.println("NOT_YET");
+                        outWrite.println("NOT_YET");
                         timeLeft--;
-                        scanner.nextLine();
-                        if ("DONE".equals(scanner.nextLine())) {
-                            doneWriting = true;
-                        }
-                        System.out.println(readPort + " " + writePort + " " + timeLeft);
+//                        fromConsole = scanner.nextLine();
+//                        if ("DONE".equals(fromConsole)) {
+//                            doneWriting = true;
+//                        }
+                        System.out.println(readPort + " " + writePort + " " + timeLeft + fromConsole);
+                        Thread.sleep(1000);
                     }
 
-                    out.println("GO");
+                    outWrite.println("GO");
                     doneWriting = false;
                     canWrite = false;
                 }
@@ -75,19 +84,19 @@ public class SocketHandler extends Thread{
                 if("DISCONNECT".equals(message)) {
                     break;
                 }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
             }
+
+        } catch (IOException | InterruptedException ioException) {
+            ioException.printStackTrace();
         }
 
-        //ma gandeam sa mai modific si eu de la tema cu airbnb dar se pare ca modificat nu merge :)))
         disconnect();
     }
 
     public void disconnect() {
         try {
-            in.close();
-            out.close();
+            inRead.close();
+            outWrite.close();
             readSocket.close();
             writeSocket.close();
         } catch(IOException ioException) {
