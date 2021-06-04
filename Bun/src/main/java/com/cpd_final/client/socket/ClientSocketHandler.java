@@ -1,4 +1,7 @@
-package com.cpd_final.client;
+package com.cpd_final.client.socket;
+
+import com.cpd_final.client.ClientEntry;
+import com.cpd_final.server.Server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class ClientSocketHandler extends Thread{
     private Socket readSocket; //left socket
@@ -17,7 +21,9 @@ public class ClientSocketHandler extends Thread{
     private Integer writePort; // right port
     private String host;
     private Integer timeLeft;
-    private final Integer INTERVAL = 10;
+    private final Integer INTERVAL = 20;
+    private static Logger logger = Logger.getLogger(ClientSocketHandler.class.getName());
+
 
     public ClientSocketHandler(Integer readPort, Integer writePort, String host) {
         this.readPort = readPort;
@@ -37,7 +43,7 @@ public class ClientSocketHandler extends Thread{
             outRead.println("S");
         } catch (IOException ioException) {
             ioException.printStackTrace();
-            System.out.println("Cannot connect. Try again");
+            logger.severe("Cannot connect. Try again");
         }
     }
 
@@ -45,9 +51,7 @@ public class ClientSocketHandler extends Thread{
     public void run() {
         connect();
 
-        Scanner scanner = new Scanner(System.in);
         String message = "";
-        String fromConsole = "";
 
         try {
             while(true) {
@@ -56,7 +60,7 @@ public class ClientSocketHandler extends Thread{
                 }
 
                 if(ClientEntry.canPub || "GO".equals(message)) {
-                    System.out.println("Writing...");
+                    logger.info("Writing...");
                     timeLeft = INTERVAL;
 
                     ClientEntry.canPub = true;
@@ -68,7 +72,7 @@ public class ClientSocketHandler extends Thread{
                     ClientEntry.canPub = false;
                     outWrite.println("GO");
                     ClientEntry.doneWriting = false;
-                    System.out.println("Done Writing...");
+                    logger.info("Done Writing...");
                 }
 
                 if("DISCONNECT".equals(message)) {
@@ -90,7 +94,7 @@ public class ClientSocketHandler extends Thread{
             readSocket.close();
             writeSocket.close();
         } catch(IOException ioException) {
-            System.out.println("Cannot disconnect. Try again");
+            logger.severe("Cannot disconnect. Try again");
         }
     }
 }

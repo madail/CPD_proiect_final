@@ -17,7 +17,6 @@ public class SocketHandler extends Thread{
 
     @Override
     public void run() {
-        System.out.println("Server socket " + socket.getPort());
         BufferedReader in = null;
         PrintWriter out = null;
         try {
