@@ -5,16 +5,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server{
-    ServerSocket socket;
 
     public void start(Integer port) {
-        try{
-            socket = new ServerSocket(port);
+        try {
+            ServerSocket serverSocket = new ServerSocket(port);
 
-            new SocketHandler(socket, port).run();
-
-        } catch(IOException exception) {
-            exception.printStackTrace();
+            while(true) {
+                Socket socket = serverSocket.accept();
+                SocketHandler socketHandler = new SocketHandler(socket);
+                socketHandler.start();
+            }
+        } catch(IOException ioException) {
+            ioException.printStackTrace();
         }
     }
 }

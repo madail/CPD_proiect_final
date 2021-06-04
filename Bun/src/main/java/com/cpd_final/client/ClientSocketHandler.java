@@ -16,9 +16,6 @@ public class ClientSocketHandler extends Thread{
     private Integer readPort; // left port
     private Integer writePort; // right port
     private String host;
-    private String token;
-    private boolean canWrite; // true if the client can post messages
-    private boolean doneWriting = false;
     private Integer timeLeft;
     private final Integer INTERVAL = 10;
 
@@ -54,31 +51,24 @@ public class ClientSocketHandler extends Thread{
 
         try {
             while(true) {
-                System.out.println("Why " + canWrite + " " + readPort + " " + writePort);
-
-                if(!canWrite) {
+                if(!ClientEntry.canPub) {
                     message = inRead.readLine();
                 }
 
-                System.out.println("Message " + message );
-
-                if(canWrite || "GO".equals(message)) {
+                if(ClientEntry.canPub || "GO".equals(message)) {
+                    System.out.println("Writing...");
                     timeLeft = INTERVAL;
 
-                    while(timeLeft > 0 && !doneWriting) {
-                        outWrite.println("NOT_YET");
+                    ClientEntry.canPub = true;
+                    while(timeLeft > 0 && !ClientEntry.doneWriting) {
                         timeLeft--;
-//                        fromConsole = scanner.nextLine();
-//                        if ("DONE".equals(fromConsole)) {
-//                            doneWriting = true;
-//                        }
-                        System.out.println(readPort + " " + writePort + " " + timeLeft + fromConsole);
                         Thread.sleep(1000);
                     }
 
+                    ClientEntry.canPub = false;
                     outWrite.println("GO");
-                    doneWriting = false;
-                    canWrite = false;
+                    ClientEntry.doneWriting = false;
+                    System.out.println("Done Writing...");
                 }
 
                 if("DISCONNECT".equals(message)) {
@@ -102,13 +92,5 @@ public class ClientSocketHandler extends Thread{
         } catch(IOException ioException) {
             System.out.println("Cannot disconnect. Try again");
         }
-    }
-
-    public void setCanWrite(boolean canWrite) {
-        this.canWrite = canWrite;
-    }
-
-    public void setDoneWriting(boolean doneWriting) {
-        this.doneWriting = doneWriting;
     }
 }
